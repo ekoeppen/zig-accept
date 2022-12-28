@@ -1,0 +1,27 @@
+default:
+  image: registry.gitlab.com/sbenv/veroxis/images/zig:nightly
+
+stages:
+  - build
+  - test
+
+build-lib:
+  stage: build
+  script:
+    - zig build
+
+build-examples:
+  stage: build
+  script:
+    - cd examples/host
+    - zig build
+
+unit-test-lib:
+  stage: test
+  script:
+    - zig test src/main.zig
+
+unit-test-examples:
+  stage: test
+  script:
+    - zig test examples/host/src/main.zig
