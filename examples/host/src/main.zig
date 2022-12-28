@@ -1,25 +1,11 @@
 const std = @import("std");
 const accept = @import("accept");
-
-var termios: std.os.termios = undefined;
+const terminal = @import("terminal");
 
 const Mode = enum {
     full,
     minimal,
 };
-
-fn makeRaw(fd: std.os.fd_t) !void {
-    termios = try std.os.tcgetattr(fd);
-    var raw = termios;
-    raw.cflag |= std.c.CLOCAL | std.c.CREAD | std.c.HUPCL;
-    raw.cflag &= ~(std.c.IXON | std.c.IXOFF);
-    raw.lflag = 0;
-    try std.os.tcsetattr(fd, .NOW, raw);
-}
-
-fn restore(fd: std.os.fd_t) void {
-    std.os.tcsetattr(fd, .NOW, termios) catch {};
-}
 
 fn read() u8 {
     var b: [1]u8 = .{0};
@@ -37,9 +23,9 @@ fn write(c: u8) void {
 pub fn main() !void {
     const stdout = std.io.getStdOut().writer();
     const mode: Mode = .full;
-    try makeRaw(0);
-    defer restore(0);
-    errdefer restore(0);
+    try terminal.makeRaw(0);
+    defer terminal.restore(0);
+    errdefer terminal.restore(0);
 
     var line: [10]u8 = .{0} ** 10;
     accept.init(&line);
