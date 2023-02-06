@@ -3,18 +3,25 @@ const std = @import("std");
 pub fn build(b: *std.build.Builder) !void {
     const stdout = std.io.getStdOut().writer();
     const target = b.standardTargetOptions(.{});
-    const mode = b.standardReleaseOptions();
+    const optimize = b.standardOptimizeOption(.{});
     const target_info = try std.zig.system.NativeTargetInfo.detect(target);
 
-    const exe = b.addExecutable("host", "src/main.zig");
-    exe.setTarget(target);
-    exe.setBuildMode(mode);
-    exe.addPackagePath("accept", "../../src/main.zig");
+    const exe = b.addExecutable(.{
+        .name = "host",
+        .root_source_file = .{ .path = "src/main.zig" },
+        .target = target,
+        .optimize = optimize,
+    });
+    exe.addAnonymousModule("accept", .{ .source_file = .{ .path = "../../src/main.zig" } });
     exe.install();
 
     switch (target_info.target.os.tag) {
-        .linux => exe.addPackagePath("terminal", "src/terminal_linux.zig"),
-        .macos => exe.addPackagePath("terminal", "src/terminal_macos.zig"),
+        .linux => exe.addAnonymousModule("terminal", .{
+            .source_file = .{ .path = "src/terminal_linux.zig" },
+        }),
+        .macos => exe.addAnonymousModule("terminal", .{
+            .source_file = .{ .path = "src/terminal_macos.zig" },
+        }),
         else => {
             try stdout.print("\nUnsupported target: {}\n", .{target_info.target});
             return error.NotSupported;

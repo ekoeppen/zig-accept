@@ -1,9 +1,10 @@
 const std = @import("std");
 
 pub fn build(b: *std.build.Builder) void {
-    const mode = b.standardReleaseOptions();
-
-    const lib = b.addStaticLibrary("accept", "src/main.zig");
-    lib.setBuildMode(mode);
-    lib.install();
+    _ = b.standardTargetOptions(.{});
+    _ = b.standardOptimizeOption(.{});
+    _ = b.addModule(.{
+        .name = "accept",
+        .source_file = .{ .path = "src/main.zig" },
+    });
 }
