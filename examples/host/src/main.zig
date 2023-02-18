@@ -29,6 +29,7 @@ pub fn main() !void {
 
     var line: [10]u8 = .{0} ** 10;
     accept.init(&line);
+    try stdout.writeAll("Starting...\n");
     while (true) {
         const result = switch (mode) {
             .full => accept.handle(write, read()),
@@ -38,6 +39,10 @@ pub fn main() !void {
             .canceled => break,
             .accepted => |l| {
                 try stdout.print("\nAccepted: {s}\n", .{l});
+                break;
+            },
+            .up, .down, .tab => {
+                try stdout.print("{}: {}\n", .{ result, accept.line });
                 break;
             },
             else => {},
